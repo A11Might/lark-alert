@@ -1,0 +1,4 @@
+###
+# hacker news api 测试
+# https://hn.algolia.com/api
+GET https://hn.algolia.com/api/v1/search?page=0&hitsPerPage=10&numericFilters=created_at_i>1738094101,created_at_i<1738184101
