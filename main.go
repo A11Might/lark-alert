@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/A11Might/lark-alert/model"
+	"github.com/A11Might/lark-alert/util"
 	"github.com/dustin/go-humanize"
 	"github.com/samber/lo"
 	"resty.dev/v3"
@@ -41,10 +43,23 @@ func main() {
 		log.Default().Println(err)
 		return
 	}
-	top10objs := (*res.Result().(*AlgoliaResponse)).Hits
-	contents := lo.Map(top10objs, func(hit *Hit, idx int) string {
+	top10objs := lo.Map((*res.Result().(*AlgoliaResponse)).Hits, func(hit *Hit, index int) *Hit {
 		if hit.URL == "" {
 			hit.URL = fmt.Sprintf("https://news.ycombinator.com/item?id=%s", hit.ObjectID)
+		}
+		return hit
+	})
+
+	lo.Map(top10objs, func(hit *Hit, idx int) string {
+		urlContent, err := util.GetTextContent(hit.URL)
+		if err != nil {
+			log.Default().Println(err)
+			return err.Error()
+		}
+		summary, err := util.CallOpenAIAPI(model.PromptOneSentenceSummary, urlContent)
+		if err != nil {
+			log.Default().Println(err)
+			return err.Error()
 		}
 
 		createdAt, err := time.Parse(time.RFC3339, hit.CreatedAt)
@@ -56,7 +71,7 @@ func main() {
 		timeAgo := humanize.Time(createdAt)
 
 		content := fmt.Sprintf(
-			"%d. **[%s](%s)**\n%d points by [%s](https://news.ycombinator.com/user?id=%s) %s | [%d comments](https://news.ycombinator.com/item?id=%s)\n\n",
+			"%d. **[%s](%s)**\n%d points by [%s](https://news.ycombinator.com/user?id=%s) %s | [%d comments](https://news.ycombinator.com/item?id=%s)\n\n%s\n\n",
 			idx+1,
 			hit.Title,
 			hit.URL,
@@ -66,8 +81,10 @@ func main() {
 			timeAgo,
 			hit.NumComments,
 			hit.ObjectID,
+			summary,
 		)
+		log.Default().Println(content)
 		return content
 	})
-	log.Default().Println(contents)
+	log.Default().Println("fetching headlines end")
 }

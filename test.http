@@ -2,3 +2,19 @@
 # hacker news api 测试
 # https://hn.algolia.com/api
 GET https://hn.algolia.com/api/v1/search?page=0&hitsPerPage=10&numericFilters=created_at_i>1738094101,created_at_i<1738184101
+
+###
+GET https://r.jina.ai/https://kibty.town/blog/todesktop/
+
+###
+curl https://api.deepseek.com/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <DeepSeek API Key>" \
+  -d '{
+        "model": "deepseek-reasoner",
+        "messages": [
+          {"role": "system", "content": "You are a helpful assistant."},
+          {"role": "user", "content": "Hello!"}
+        ],
+        "stream": false
+      }'
