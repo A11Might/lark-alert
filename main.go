@@ -50,41 +50,35 @@ func main() {
 		return hit
 	})
 
-	lo.Map(top10objs, func(hit *Hit, idx int) string {
+	list := lo.Map(top10objs, func(hit *Hit, idx int) map[string]string {
 		urlContent, err := util.GetTextContent(hit.URL)
 		if err != nil {
 			log.Default().Println(err)
-			return err.Error()
+			return nil
 		}
 		summary, err := util.CallOpenAIAPI(model.PromptOneSentenceSummary, urlContent)
 		if err != nil {
 			log.Default().Println(err)
-			return err.Error()
+			return nil
 		}
 
 		createdAt, err := time.Parse(time.RFC3339, hit.CreatedAt)
 		if err != nil {
 			log.Default().Println(err)
-			return ""
+			return nil
 		}
 
 		timeAgo := humanize.Time(createdAt)
 
-		content := fmt.Sprintf(
-			"%d. **[%s](%s)**\n%d points by [%s](https://news.ycombinator.com/user?id=%s) %s | [%d comments](https://news.ycombinator.com/item?id=%s)\n\n%s\n\n",
-			idx+1,
-			hit.Title,
-			hit.URL,
-			hit.Points,
-			hit.Author,
-			hit.Author,
-			timeAgo,
-			hit.NumComments,
-			hit.ObjectID,
-			summary,
-		)
-		log.Default().Println(content)
-		return content
+		title := fmt.Sprintf("[%s](%s)", hit.Title, hit.URL)
+		status := fmt.Sprintf("%d points by [%s](https://news.ycombinator.com/user?id=%s) %s | [%d comments](https://news.ycombinator.com/item?id=%s)",
+			hit.Points, hit.Author, hit.Author, timeAgo, hit.NumComments, hit.ObjectID)
+		return map[string]string{
+			"title":        title,
+			"list_content": summary,
+			"status":       status,
+		}
 	})
+	util.SendCard(util.BuildTemplateCard(list))
 	log.Default().Println("fetching headlines end")
 }

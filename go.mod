@@ -4,6 +4,7 @@ go 1.23.1
 
 require (
 	github.com/dustin/go-humanize v1.0.1
+	github.com/larksuite/oapi-sdk-go/v3 v3.4.10
 	github.com/samber/lo v1.49.1
 	resty.dev/v3 v3.0.0-beta.1
 )

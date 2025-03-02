@@ -17,9 +17,9 @@ import (
 // 法单方面停火。特朗普称泽连斯基“想继续战斗”，主张立即停火但暗示可能缩减援助。加拿大总理特鲁多重申支持乌克兰，俄军则袭击哈尔科夫致医院起火。事件凸显美乌关系紧张及国内对援乌分歧。
 
 func CallOpenAIAPI(prompt, content string) (string, error) {
-	apiKey := os.Getenv("apiKey")
-	llmModel := "deepseek-reasoner"
-	endpoint := "https://api.deepseek.com/chat/completions"
+	apiKey := os.Getenv("API_KEY")
+	llmModel := os.Getenv("MODEL")
+	endpoint := os.Getenv("ENDPOINT")
 
 	c := resty.New()
 	defer c.Close()
