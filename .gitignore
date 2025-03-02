@@ -26,3 +26,7 @@ go.work.sum
 
 # mac
 .DS_Store
+
+# act
+my.secrets
+my.variables

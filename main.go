@@ -51,6 +51,7 @@ func main() {
 	})
 
 	list := lo.Map(top10objs, func(hit *Hit, idx int) map[string]string {
+		log.Default().Printf("start fetch [%s]\n", hit.Title)
 		urlContent, err := util.GetTextContent(hit.URL)
 		if err != nil {
 			log.Default().Println(err)
@@ -73,6 +74,8 @@ func main() {
 		title := fmt.Sprintf("[%s](%s)", hit.Title, hit.URL)
 		status := fmt.Sprintf("%d points by [%s](https://news.ycombinator.com/user?id=%s) %s | [%d comments](https://news.ycombinator.com/item?id=%s)",
 			hit.Points, hit.Author, hit.Author, timeAgo, hit.NumComments, hit.ObjectID)
+
+		log.Default().Printf("end fetch [%s]\n", hit.Title)
 		return map[string]string{
 			"title":        title,
 			"list_content": summary,
