@@ -30,3 +30,7 @@ go.work.sum
 # act
 my.secrets
 my.variables
+
+# local dev
+speech.mp3
+speech.opus

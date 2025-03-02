@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -82,6 +83,43 @@ func main() {
 			"status":       status,
 		}
 	})
-	util.SendCard(util.BuildTemplateCard(list))
+	listStr, _ := json.Marshal(list)
+	log.Default().Println(string(listStr))
+	podcast, err := util.CallOpenAIAPI(model.PromptPodcast, string(listStr))
+	if err != nil {
+		log.Default().Println(err.Error())
+		return
+	}
+	log.Default().Println("podcoast:", podcast)
+	err = util.TextToSpeech("speech.mp3", podcast)
+	if err != nil {
+		log.Default().Println(err.Error())
+		return
+	}
+	_, err = util.ConvertToOpus("speech.mp3", "speech.opus")
+	if err != nil {
+		log.Default().Println(err.Error())
+		return
+	}
+	length, err := util.GetAudioDuration("speech.mp3")
+	if err != nil {
+		log.Default().Println(err.Error())
+		return
+	}
+	log.Default().Println("length:", length)
+	fileKey, err := util.UploadFile("speech.opus", int(length*1000))
+	if err != nil {
+		log.Default().Println(err.Error())
+		return
+	}
+	log.Default().Println("fileKey:", fileKey)
+	messageId, err := util.SendMsg("interactive", util.BuildTemplateCard(list))
+	if err != nil {
+		log.Default().Println(err.Error())
+		return
+	}
+	log.Default().Println("messageId:", messageId)
+	audio := util.BuildAuidtMsg(fileKey)
+	util.ReplayMsg(messageId, "audio", audio)
 	log.Default().Println("fetching headlines end")
 }

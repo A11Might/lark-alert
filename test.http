@@ -4,17 +4,38 @@
 GET https://hn.algolia.com/api/v1/search?page=0&hitsPerPage=10&numericFilters=created_at_i>1738094101,created_at_i<1738184101
 
 ###
+# jina reader 获取文本内容
 GET https://r.jina.ai/https://kibty.town/blog/todesktop/
 
 ###
-curl https://api.deepseek.com/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <DeepSeek API Key>" \
-  -d '{
-        "model": "deepseek-reasoner",
-        "messages": [
-          {"role": "system", "content": "You are a helpful assistant."},
-          {"role": "user", "content": "Hello!"}
-        ],
-        "stream": false
-      }'
+# deepseek api
+POST https://api.deepseek.com/chat/completions
+Content-Type: application/json
+Authorization: Bearer {{API_KEY}}
+
+{
+    "model": "deepseek-reasoner",
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a helpful assistant."
+        },
+        {
+            "role": "user",
+            "content": "Hello!"
+        }
+    ],
+    "stream": false
+}
+
+###
+# ElevenReader api
+# https://elevenlabs.io/docs/api-reference/text-to-speech/convert
+POST https://api.elevenlabs.io/v1/text-to-speech/nPczCjzI2devNBz1zQrb?output_format=mp3_44100_128
+xi-api-key: sk_a7ac2730d202774fd7db9e81da9969297a599f3306a57416
+Content-Type: application/json
+
+{
+    "text": "一个致力于改善政府技术的非党派组织，在2025年3月1日被美国政府终止运营。",
+    "model_id": "eleven_multilingual_v2"
+}

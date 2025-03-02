@@ -12,6 +12,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Setup FFmpeg
+      uses: federicocarboni/setup-ffmpeg@v3.1
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
@@ -22,6 +25,7 @@ jobs:
         API_KEY: ${{ secrets.API_KEY }}
         MODEL: ${{ vars.MODEL }}
         ENDPOINT: ${{ vars.ENDPOINT }}
+        XI_API_KEY: ${{ secrets.XI_API_KEY }}
         APP_ID: ${{ vars.APP_ID }}
         APP_SECRET: ${{ secrets.APP_SECRET }}
       run: go run main.go

@@ -48,3 +48,23 @@ func CallOpenAIAPI(prompt, content string) (string, error) {
 	}
 	return res.Result().(*model.OpenAIResponse).Choices[0].Message.Content, nil
 }
+
+func TextToSpeech(fileName, text string) error {
+	c := resty.New()
+	defer c.Close()
+
+	_, err := c.R().
+		SetSaveResponse(true).
+		SetOutputFileName(fileName).
+		SetHeader("Content-Type", "application/json").
+		SetHeader("xi-api-key", os.Getenv("XI_API_KEY")).
+		SetBody(map[string]string{
+			"text":     text,
+			"model_id": "eleven_multilingual_v2",
+		}).
+		Post("https://api.elevenlabs.io/v1/text-to-speech/nPczCjzI2devNBz1zQrb?output_format=mp3_44100_128")
+	if err != nil {
+		return err
+	}
+	return nil
+}
