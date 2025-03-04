@@ -83,6 +83,14 @@ func main() {
 			"status":       status,
 		}
 	})
+
+	messageId, err := util.SendMsg("interactive", util.BuildTemplateCard(list))
+	if err != nil {
+		log.Default().Println(err.Error())
+		return
+	}
+	log.Default().Println("messageId:", messageId)
+
 	listStr, _ := json.Marshal(list)
 	log.Default().Println(string(listStr))
 	podcast, err := util.CallOpenAIAPI(model.PromptPodcast, string(listStr))
@@ -113,12 +121,6 @@ func main() {
 		return
 	}
 	log.Default().Println("fileKey:", fileKey)
-	messageId, err := util.SendMsg("interactive", util.BuildTemplateCard(list))
-	if err != nil {
-		log.Default().Println(err.Error())
-		return
-	}
-	log.Default().Println("messageId:", messageId)
 	audio := util.BuildAuidtMsg(fileKey)
 	util.ReplayMsg(messageId, "audio", audio)
 	log.Default().Println("fetching headlines end")
