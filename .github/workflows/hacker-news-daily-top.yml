@@ -15,6 +15,19 @@ jobs:
     - name: Setup FFmpeg
       uses: federicocarboni/setup-ffmpeg@v3.1
 
+    - name: Install Microsoft Speech SDK
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y build-essential ca-certificates libasound2-dev libssl-dev wget
+        export SPEECHSDK_ROOT="$HOME/speechsdk"
+        mkdir -p "$SPEECHSDK_ROOT"
+        wget -O SpeechSDK-Linux.tar.gz https://aka.ms/csspeech/linuxbinary
+        tar --strip 1 -xzf SpeechSDK-Linux.tar.gz -C "$SPEECHSDK_ROOT"
+        ls -l "$SPEECHSDK_ROOT"
+        export CGO_CFLAGS="-I$SPEECHSDK_ROOT/include/c_api"
+        export CGO_LDFLAGS="-L$SPEECHSDK_ROOT/lib/x64 -lMicrosoft.CognitiveServices.Speech.core"
+        export LD_LIBRARY_PATH="$SPEECHSDK_ROOT/lib/x64:$LD_LIBRARY_PATH"
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
@@ -28,4 +41,6 @@ jobs:
         XI_API_KEY: ${{ secrets.XI_API_KEY }}
         APP_ID: ${{ vars.APP_ID }}
         APP_SECRET: ${{ secrets.APP_SECRET }}
+        SPEECH_REGION: ${{ vars.SPEECH_REGION }}
+        SPEECH_KEY: ${{ secrets.SPEECH_KEY }}
       run: go run main.go

@@ -99,11 +99,12 @@ func main() {
 		return
 	}
 	log.Default().Println("podcoast:", podcast)
-	err = util.TextToSpeech("speech.mp3", podcast)
-	if err != nil {
-		log.Default().Println(err.Error())
-		return
-	}
+	util.TextToSpeechMS("speech.mp3", podcast)
+	// err = util.TextToSpeech("speech.mp3", podcast)
+	// if err != nil {
+	// 	log.Default().Println(err.Error())
+	// 	return
+	// }
 	_, err = util.ConvertToOpus("speech.mp3", "speech.opus")
 	if err != nil {
 		log.Default().Println(err.Error())
