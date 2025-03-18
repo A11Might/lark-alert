@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/A11Might/lark-alert/model"
@@ -99,12 +100,28 @@ func main() {
 		return
 	}
 	log.Default().Println("podcoast:", podcast)
-	util.TextToSpeechMS("speech.mp3", podcast)
-	// err = util.TextToSpeech("speech.mp3", podcast)
-	// if err != nil {
-	// 	log.Default().Println(err.Error())
-	// 	return
-	// }
+
+	strs := strings.Split(podcast, "\n")
+	idx := 0
+	var mp3List []string
+	for _, v := range strs {
+		if v != "" {
+			log.Default().Printf(">>>>>>>>>%d, Text: %s<<<<<<<,\n", idx, v)
+			mp3Name := fmt.Sprintf("speech_%d.mp3", idx)
+			if err := util.TextToSpeechByAzure(mp3Name, v); err != nil {
+				log.Default().Println(err.Error())
+				return
+			}
+			mp3List = append(mp3List, mp3Name)
+			idx++
+		}
+	}
+	_, err = util.ConcatMP3Files(mp3List, "speech.mp3")
+	if err != nil {
+		log.Default().Println(err.Error())
+		return
+	}
+
 	_, err = util.ConvertToOpus("speech.mp3", "speech.opus")
 	if err != nil {
 		log.Default().Println(err.Error())

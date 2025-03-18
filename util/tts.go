@@ -11,6 +11,7 @@ import (
 	"resty.dev/v3"
 )
 
+// https://elevenlabs.io/docs/api-reference/text-to-speech/convert
 func TextToSpeech(fileName, text string) error {
 	c := resty.New()
 	defer c.Close()
@@ -51,20 +52,19 @@ func cancelledHandler(event speech.SpeechSynthesisEventArgs) {
 	fmt.Println("Received a cancellation.")
 }
 
-func TextToSpeechMS(filename, content string) {
+// https://learn.microsoft.com/zh-cn/azure/ai-services/speech-service/get-started-text-to-speech?tabs=windows%2Cterminal&pivots=programming-language-go
+func TextToSpeechByAzure(filename, content string) error {
 	speechKey := os.Getenv("SPEECH_KEY")
 	speechRegion := os.Getenv("SPEECH_REGION")
 
 	audioConfig, err := audio.NewAudioConfigFromDefaultSpeakerOutput()
 	if err != nil {
-		fmt.Println("Got an error: ", err)
-		return
+		return fmt.Errorf("Got an error: ", err)
 	}
 	defer audioConfig.Close()
 	speechConfig, err := speech.NewSpeechConfigFromSubscription(speechKey, speechRegion)
 	if err != nil {
-		fmt.Println("Got an error: ", err)
-		return
+		return fmt.Errorf("Got an error: ", err)
 	}
 	defer speechConfig.Close()
 
@@ -73,8 +73,7 @@ func TextToSpeechMS(filename, content string) {
 
 	speechSynthesizer, err := speech.NewSpeechSynthesizerFromConfig(speechConfig, audioConfig)
 	if err != nil {
-		fmt.Println("Got an error: ", err)
-		return
+		return fmt.Errorf("Got an error: ", err)
 	}
 	defer speechSynthesizer.Close()
 
@@ -88,30 +87,28 @@ func TextToSpeechMS(filename, content string) {
 	select {
 	case outcome = <-task:
 	case <-time.After(60 * time.Second):
-		fmt.Println("Timed out")
-		return
+		return fmt.Errorf("Timed out")
 	}
 	defer outcome.Close()
 	if outcome.Error != nil {
-		fmt.Println("Got an error: ", outcome.Error)
-		return
+		return fmt.Errorf("Got an error: ", outcome.Error)
 	}
 
 	if outcome.Result.Reason == common.SynthesizingAudioCompleted {
 		fmt.Printf("Speech synthesized to speaker for text [%s].\n", content)
 		if err := os.WriteFile(filename, outcome.Result.AudioData, 0644); err != nil {
-			fmt.Println("文件保存失败:", err)
-		} else {
-			fmt.Printf("语音已保存至 %s\n", filename)
+			return fmt.Errorf("文件保存失败:", err)
 		}
+		fmt.Printf("语音已保存至 %s\n", filename)
 	} else {
 		cancellation, _ := speech.NewCancellationDetailsFromSpeechSynthesisResult(outcome.Result)
 		fmt.Printf("CANCELED: Reason=%d.\n", cancellation.Reason)
 
 		if cancellation.Reason == common.Error {
-			fmt.Printf("CANCELED: ErrorCode=%d\nCANCELED: ErrorDetails=[%s]\nCANCELED: Did you set the speech resource key and region values?\n",
+			return fmt.Errorf("CANCELED: ErrorCode=%d\nCANCELED: ErrorDetails=[%s]\nCANCELED: Did you set the speech resource key and region values?\n",
 				cancellation.ErrorCode,
 				cancellation.ErrorDetails)
 		}
 	}
+	return nil
 }
